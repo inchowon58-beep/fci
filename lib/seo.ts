@@ -7,11 +7,12 @@ import { placeCopy } from "@/lib/place";
 
 export function getSiteUrl() {
   const candidates = [
+    // 서버 전용(권장) — Vercel에서 NEXT_PUBLIC_ 없이 SITE_URL 로 설정
+    process.env.SITE_URL?.trim(),
     process.env.NEXT_PUBLIC_SITE_URL?.trim(),
     process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
       : undefined,
-    // 이 프로젝트 기본 프로덕션 도메인
     "https://fci.infocs.co.kr",
   ];
 
@@ -19,7 +20,6 @@ export function getSiteUrl() {
     if (!raw) continue;
     try {
       const origin = new URL(raw.includes("://") ? raw : `https://${raw}`).origin;
-      // 로컬호스트는 배포·네이버 제출용으로 쓰지 않음
       if (/localhost|127\.0\.0\.1/i.test(origin)) continue;
       return origin;
     } catch {
