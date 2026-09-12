@@ -1,7 +1,6 @@
 "use client";
 
-import { useId, useMemo } from "react";
-import { useInViewOnce } from "@/components/charts/use-in-view";
+import { useEffect, useId, useMemo, useState } from "react";
 import { cn } from "@/lib/cn";
 
 function toPath(
@@ -46,8 +45,21 @@ export function LineChart({
   className?: string;
   dark?: boolean;
 }) {
-  const { ref, visible } = useInViewOnce<HTMLDivElement>();
-  const gradId = useId();
+  const rawId = useId();
+  const gradId = `chart-grad-${rawId.replace(/:/g, "")}`;
+  const [play, setPlay] = useState(false);
+
+  /** 마운트 직후 재생 — IntersectionObserver에만 의존하면 히어로에서 자주 멈춤 */
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setPlay(true);
+      return;
+    }
+    const t = window.setTimeout(() => setPlay(true), 80);
+    return () => window.clearTimeout(t);
+  }, []);
+
   const width = 680;
   const height = 228;
   const padLeft = 52;
@@ -76,7 +88,7 @@ export function LineChart({
   const grid = [0, 0.25, 0.5, 0.75, 1];
 
   return (
-    <div ref={ref} className={cn("w-full", className)}>
+    <div className={cn("w-full min-h-[200px]", className)}>
       <svg
         viewBox={`0 0 ${width} ${height + 34}`}
         className="h-auto w-full overflow-visible"
@@ -113,7 +125,11 @@ export function LineChart({
             </g>
           ))}
 
-          <path d={areaPath} fill={`url(#${gradId})`} className={visible ? "chart-area-in" : "opacity-0"} />
+          <path
+            d={areaPath}
+            fill={`url(#${gradId})`}
+            className={play ? "chart-area-in" : "chart-hidden"}
+          />
           <path
             d={impressionPath}
             pathLength={1}
@@ -122,7 +138,7 @@ export function LineChart({
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={visible ? "chart-line-draw" : "opacity-0"}
+            className={play ? "chart-line-draw" : "chart-hidden"}
           />
           <path
             d={clickPath}
@@ -132,10 +148,10 @@ export function LineChart({
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={visible ? "chart-line-draw-delay" : "opacity-0"}
+            className={play ? "chart-line-draw-delay" : "chart-hidden"}
           />
 
-          {visible
+          {play
             ? impressions.map((value, index) => {
                 const step = Math.max(1, Math.floor(impressions.length / 6));
                 if (index % step !== 0 && index !== impressions.length - 1) return null;
@@ -152,7 +168,7 @@ export function LineChart({
                 );
               })
             : null}
-          {visible
+          {play
             ? clicks.map((value, index) => {
                 const step = Math.max(1, Math.floor(clicks.length / 6));
                 if (index % step !== 0 && index !== clicks.length - 1) return null;

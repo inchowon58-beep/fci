@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useInViewOnce } from "@/components/charts/use-in-view";
 import { cn } from "@/lib/cn";
 
 export function CountUp({
@@ -15,12 +14,9 @@ export function CountUp({
   className?: string;
   format?: (n: number) => string;
 }) {
-  const { ref, visible } = useInViewOnce<HTMLSpanElement>();
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    if (!visible) return;
-
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) {
       setCurrent(value);
@@ -37,12 +33,18 @@ export function CountUp({
       if (progress < 1) frame = requestAnimationFrame(tick);
     };
 
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [duration, value, visible]);
+    const delay = window.setTimeout(() => {
+      frame = requestAnimationFrame(tick);
+    }, 80);
+
+    return () => {
+      window.clearTimeout(delay);
+      cancelAnimationFrame(frame);
+    };
+  }, [duration, value]);
 
   return (
-    <span ref={ref} className={cn("tabular-nums", className)}>
+    <span className={cn("tabular-nums", className)}>
       {format ? format(current) : Math.round(current).toLocaleString("ko-KR")}
     </span>
   );
