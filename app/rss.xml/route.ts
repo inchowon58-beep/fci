@@ -14,55 +14,86 @@ function escapeXml(value: string) {
     .replace(/'/g, "&apos;");
 }
 
-/** 네이버 서치어드바이저용 RSS */
+function toRfc822(input?: string) {
+  const d = input ? new Date(input) : new Date();
+  if (Number.isNaN(d.getTime())) return new Date().toUTCString();
+  return d.toUTCString();
+}
+
+/** 네이버 서치어드바이저용 RSS 2.0 */
 export async function GET() {
   const base = getSiteUrl();
+  const feedUrl = `${base}/rss.xml`;
   const cms = await readCms();
   const notices = sortedNotices(cms, 20);
-  const now = new Date().toUTCString();
+  const buildDate = toRfc822();
 
-  const items: { title: string; link: string; description: string; pubDate: string }[] = [
+  type Item = {
+    title: string;
+    link: string;
+    description: string;
+    pubDate: string;
+  };
+
+  const items: Item[] = [
     {
       title: site.name,
-      link: base,
+      link: `${base}/`,
       description: site.description,
-      pubDate: now,
+      pubDate: buildDate,
     },
     {
       title: "반려동물 업종 디렉터리",
       link: absoluteUrl("/c"),
       description: "동물병원·펫샵·미용 등 반려동물 업종을 지역별로 찾습니다.",
-      pubDate: now,
+      pubDate: buildDate,
     },
     ...DIRECTORY_CATEGORIES.map((c) => ({
       title: c.title,
       link: absoluteUrl(categoryPath(c.slug)),
       description: c.blurb || `${c.title} 업체 디렉터리`,
-      pubDate: now,
+      pubDate: buildDate,
     })),
-    ...notices.map((n) => ({
-      title: n.title,
-      link: n.href?.startsWith("http") ? n.href : absoluteUrl(n.href || "/"),
-      description: n.title,
-      pubDate: n.date ? new Date(n.date).toUTCString() : now,
-    })),
-  ];
+    ...notices.map((n) => {
+      const link =
+        n.href && /^https?:\/\//i.test(n.href)
+          ? n.href
+          : n.href
+            ? absoluteUrl(n.href)
+            : `${base}/`;
+      // 네이버: 소유 확인 도메인과 item URL 도메인이 같아야 함
+      let safeLink = link;
+      try {
+        const u = new URL(link);
+        if (u.origin !== base) safeLink = `${base}/`;
+      } catch {
+        safeLink = `${base}/`;
+      }
+      return {
+        title: n.title,
+        link: safeLink,
+        description: n.title,
+        pubDate: toRfc822(n.date),
+      };
+    }),
+  ].filter((item) => item.title && item.link.startsWith(base));
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${escapeXml(site.name)}</title>
-    <link>${escapeXml(base)}</link>
+    <link>${escapeXml(base)}/</link>
     <description>${escapeXml(site.description)}</description>
     <language>ko</language>
-    <lastBuildDate>${now}</lastBuildDate>
+    <lastBuildDate>${buildDate}</lastBuildDate>
+    <atom:link href="${escapeXml(feedUrl)}" rel="self" type="application/rss+xml" />
     ${items
       .map(
         (item) => `<item>
       <title>${escapeXml(item.title)}</title>
       <link>${escapeXml(item.link)}</link>
-      <guid>${escapeXml(item.link)}</guid>
-      <description>${escapeXml(item.description)}</description>
+      <guid isPermaLink="true">${escapeXml(item.link)}</guid>
+      <description><![CDATA[${item.description}]]></description>
       <pubDate>${item.pubDate}</pubDate>
     </item>`,
       )
