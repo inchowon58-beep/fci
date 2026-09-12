@@ -35,6 +35,11 @@ export const metadata: Metadata = {
     icon: "/kkf/icon.png",
     apple: "/kkf/icon.png",
   },
+  verification: {
+    other: {
+      "naver-site-verification": "7f0520ae6c1be823080b88d9a259bc3c314688cc",
+    },
+  },
 };
 
 export default function RootLayout({
