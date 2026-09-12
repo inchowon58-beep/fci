@@ -104,7 +104,7 @@ export async function loadPetCultureFacilities(): Promise<{
   businesses: PetBusiness[];
 }> {
   const { path: csvPath } = await ensurePetCultureCsv();
-  const raw = await fs.readFile(csvPath, "utf8");
+  const raw = await fs.readFile(/*turbopackIgnore: true*/ csvPath, "utf8");
   const text = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw;
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
   if (lines.length < 2) {

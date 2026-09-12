@@ -11,9 +11,8 @@ import { Partners } from "@/components/sections/partners";
 import { Faq } from "@/components/sections/faq";
 import { buildHomeJsonLd, buildHomeMetadata } from "@/lib/seo";
 import { readCms } from "@/lib/cms";
-import { REVALIDATE_HOME } from "@/lib/cache-config";
-
-export const revalidate = REVALIDATE_HOME;
+/** ISR 1시간 — Next segment config는 리터럴만 허용 */
+export const revalidate = 3600;
 
 export const metadata: Metadata = buildHomeMetadata();
 

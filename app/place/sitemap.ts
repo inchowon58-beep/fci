@@ -5,10 +5,9 @@ import { getSiteUrl } from "@/lib/seo";
 import {
   PLACE_SITEMAP_CHUNK,
   PLACE_SITEMAP_FILE_COUNT,
-  REVALIDATE_SITEMAP,
 } from "@/lib/cache-config";
 
-export const revalidate = REVALIDATE_SITEMAP;
+export const revalidate = 86400;
 
 /** /place/sitemap/0.xml … — 업체 상세 URL (Google 5만 제한 대비 분할) */
 export async function generateSitemaps() {

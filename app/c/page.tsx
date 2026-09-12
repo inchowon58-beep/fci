@@ -5,9 +5,7 @@ import { DIRECTORY_CATEGORIES, categoryPath, filterByCategory } from "@/lib/dire
 import { getRegisteredBusinesses } from "@/lib/registry";
 import { buildDirectoryIndexMetadata, absoluteUrl, getSiteUrl } from "@/lib/seo";
 import { site } from "@/lib/copy";
-import { REVALIDATE_DIRECTORY } from "@/lib/cache-config";
-
-export const revalidate = REVALIDATE_DIRECTORY;
+export const revalidate = 3600;
 
 export const metadata: Metadata = buildDirectoryIndexMetadata();
 

@@ -5,9 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { BusinessCard } from "@/components/business-card";
 import { categoryPath, getCategoryListing } from "@/lib/directory";
 import { buildCategoryJsonLd, buildCategoryMetadata } from "@/lib/seo";
-import { REVALIDATE_DIRECTORY } from "@/lib/cache-config";
-
-export const revalidate = REVALIDATE_DIRECTORY;
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,

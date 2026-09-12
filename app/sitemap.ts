@@ -2,9 +2,7 @@ import type { MetadataRoute } from "next";
 import { DIRECTORY_CATEGORIES, categoryPath, filterByCategory, groupBySido } from "@/lib/directory";
 import { getRegisteredBusinesses } from "@/lib/registry";
 import { getSiteUrl } from "@/lib/seo";
-import { REVALIDATE_SITEMAP } from "@/lib/cache-config";
-
-export const revalidate = REVALIDATE_SITEMAP;
+export const revalidate = 86400;
 
 /** 정적·업종·시·도 랜딩 사이트맵 */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

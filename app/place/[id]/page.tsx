@@ -22,10 +22,8 @@ import { activePartners, readCms, sortedNotices } from "@/lib/cms";
 import { pickRelatedBusinesses } from "@/lib/related";
 import { site } from "@/lib/copy";
 import { buildPlaceJsonLd, buildPlaceMetadata } from "@/lib/seo";
-import { REVALIDATE_PLACE } from "@/lib/cache-config";
-
-/** CDN ISR — 재방문·크롤은 함수 재실행 없이 캐시 HTML */
-export const revalidate = REVALIDATE_PLACE;
+/** CDN ISR 24시간 — 재방문·크롤은 함수 재실행 없이 캐시 HTML */
+export const revalidate = 86400;
 
 export async function generateMetadata({
   params,

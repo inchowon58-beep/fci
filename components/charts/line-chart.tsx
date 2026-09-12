@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef } from "react";
 import { cn } from "@/lib/cn";
 
 function toPath(
@@ -30,6 +30,38 @@ function clickBandY(value: number, values: number[], height: number, impressionY
   return Math.min(height * 0.94, Math.max(bandY, belowBlue));
 }
 
+function drawPath(el: SVGPathElement | null, durationMs: number, delayMs = 0) {
+  if (!el) return () => {};
+  const length = el.getTotalLength();
+  el.style.strokeDasharray = `${length}`;
+  el.style.strokeDashoffset = `${length}`;
+  el.style.opacity = "1";
+
+  let frame = 0;
+  let startAt = 0;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const run = (now: number) => {
+    if (!startAt) startAt = now;
+    const elapsed = now - startAt - delayMs;
+    if (elapsed < 0) {
+      frame = requestAnimationFrame(run);
+      return;
+    }
+    if (reduce) {
+      el.style.strokeDashoffset = "0";
+      return;
+    }
+    const t = Math.min(elapsed / durationMs, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.style.strokeDashoffset = `${length * (1 - eased)}`;
+    if (t < 1) frame = requestAnimationFrame(run);
+  };
+
+  frame = requestAnimationFrame(run);
+  return () => cancelAnimationFrame(frame);
+}
+
 export function LineChart({
   impressions,
   clicks,
@@ -47,18 +79,9 @@ export function LineChart({
 }) {
   const rawId = useId();
   const gradId = `chart-grad-${rawId.replace(/:/g, "")}`;
-  const [play, setPlay] = useState(false);
-
-  /** 마운트 직후 재생 — IntersectionObserver에만 의존하면 히어로에서 자주 멈춤 */
-  useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setPlay(true);
-      return;
-    }
-    const t = window.setTimeout(() => setPlay(true), 80);
-    return () => window.clearTimeout(t);
-  }, []);
+  const impressionRef = useRef<SVGPathElement | null>(null);
+  const clickRef = useRef<SVGPathElement | null>(null);
+  const areaRef = useRef<SVGPathElement | null>(null);
 
   const width = 680;
   const height = 228;
@@ -87,11 +110,33 @@ export function LineChart({
   const areaPath = `${impressionPath} L ${innerW} ${innerH} L 0 ${innerH} Z`;
   const grid = [0, 0.25, 0.5, 0.75, 1];
 
+  useLayoutEffect(() => {
+    const stopA = drawPath(impressionRef.current, 1600, 0);
+    const stopB = drawPath(clickRef.current, 1600, 220);
+    if (areaRef.current) {
+      areaRef.current.style.opacity = "0";
+      const t = window.setTimeout(() => {
+        if (areaRef.current) areaRef.current.style.opacity = "1";
+      }, 450);
+      return () => {
+        stopA();
+        stopB();
+        window.clearTimeout(t);
+      };
+    }
+    return () => {
+      stopA();
+      stopB();
+    };
+  }, [impressionPath, clickPath]);
+
   return (
-    <div className={cn("w-full min-h-[200px]", className)}>
+    <div className={cn("w-full", className)} style={{ minHeight: 220 }}>
       <svg
         viewBox={`0 0 ${width} ${height + 34}`}
-        className="h-auto w-full overflow-visible"
+        width="100%"
+        height="100%"
+        style={{ display: "block", width: "100%", height: "auto", minHeight: 220 }}
         role="img"
         aria-label="최근 60일 콘텐츠 노출·클릭 추이 그래프"
       >
@@ -126,65 +171,60 @@ export function LineChart({
           ))}
 
           <path
+            ref={areaRef}
             d={areaPath}
             fill={`url(#${gradId})`}
-            className={play ? "chart-area-in" : "chart-hidden"}
+            style={{ opacity: 0, transition: "opacity 0.8s ease 0.45s" }}
           />
           <path
+            ref={impressionRef}
             d={impressionPath}
-            pathLength={1}
             fill="none"
             stroke="#60a5fa"
             strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={play ? "chart-line-draw" : "chart-hidden"}
+            style={{ opacity: 1 }}
           />
           <path
+            ref={clickRef}
             d={clickPath}
-            pathLength={1}
             fill="none"
             stroke="#f59e0b"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className={play ? "chart-line-draw-delay" : "chart-hidden"}
+            style={{ opacity: 1 }}
           />
 
-          {play
-            ? impressions.map((value, index) => {
-                const step = Math.max(1, Math.floor(impressions.length / 6));
-                if (index % step !== 0 && index !== impressions.length - 1) return null;
-                const x = (index / Math.max(impressions.length - 1, 1)) * innerW;
-                return (
-                  <circle
-                    key={`imp-${index}-${value}`}
-                    cx={x}
-                    cy={impressionY(value)}
-                    r="4"
-                    fill="#93c5fd"
-                    className="chart-dot-in"
-                  />
-                );
-              })
-            : null}
-          {play
-            ? clicks.map((value, index) => {
-                const step = Math.max(1, Math.floor(clicks.length / 6));
-                if (index % step !== 0 && index !== clicks.length - 1) return null;
-                const x = (index / Math.max(clicks.length - 1, 1)) * innerW;
-                return (
-                  <circle
-                    key={`clk-${index}-${value}`}
-                    cx={x}
-                    cy={clickY(value, index)}
-                    r="3.5"
-                    fill="#f59e0b"
-                    className="chart-dot-in"
-                  />
-                );
-              })
-            : null}
+          {impressions.map((value, index) => {
+            const step = Math.max(1, Math.floor(impressions.length / 6));
+            if (index % step !== 0 && index !== impressions.length - 1) return null;
+            const x = (index / Math.max(impressions.length - 1, 1)) * innerW;
+            return (
+              <circle
+                key={`imp-${index}-${value}`}
+                cx={x}
+                cy={impressionY(value)}
+                r="4"
+                fill="#93c5fd"
+              />
+            );
+          })}
+          {clicks.map((value, index) => {
+            const step = Math.max(1, Math.floor(clicks.length / 6));
+            if (index % step !== 0 && index !== clicks.length - 1) return null;
+            const x = (index / Math.max(clicks.length - 1, 1)) * innerW;
+            return (
+              <circle
+                key={`clk-${index}-${value}`}
+                cx={x}
+                cy={clickY(value, index)}
+                r="3.5"
+                fill="#f59e0b"
+              />
+            );
+          })}
         </g>
 
         {labels.map((label, index) => {

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { fetchPlaceNaverMedia, getNaverCredentials } from "@/lib/naver-search";
-import { REVALIDATE_NAVER } from "@/lib/cache-config";
 
 /** CDN 캐시 가능 — 동일 업체 반복 호출 비용↓ */
-export const revalidate = REVALIDATE_NAVER;
+export const revalidate = 86400;
 export const runtime = "nodejs";
+
+const NAVER_CACHE_SEC = 86400;
 
 export async function GET(req: Request) {
   if (!getNaverCredentials().ok) {
@@ -23,7 +24,7 @@ export async function GET(req: Request) {
     { ok: true, media },
     {
       headers: {
-        "Cache-Control": `public, s-maxage=${REVALIDATE_NAVER}, stale-while-revalidate=${REVALIDATE_NAVER}`,
+        "Cache-Control": `public, s-maxage=${NAVER_CACHE_SEC}, stale-while-revalidate=${NAVER_CACHE_SEC}`,
       },
     },
   );

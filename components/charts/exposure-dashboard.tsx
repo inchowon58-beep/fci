@@ -69,7 +69,7 @@ export function ExposureDashboardPreview({ className }: { className?: string }) 
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col justify-center px-2 pb-2 pt-3 sm:px-3">
+      <div className="px-2 pb-2 pt-3 sm:px-3" style={{ minHeight: 240 }}>
         <LineChart
           impressions={[...data.impressionsSeries]}
           clicks={[...data.clicksSeries]}
