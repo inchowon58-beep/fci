@@ -1,0 +1,100 @@
+{
+  "updatedAt": "2026-09-12T07:40:00.000Z",
+  "partners": [
+    {
+      "active": true,
+      "name": "사단법인 한국애견연맹",
+      "phone": "010-2374-0401",
+      "homepage": "https://www.thekkf.or.kr/new_home/main.php",
+      "kakao": "https://www.thekkf.or.kr/new_home/main.php",
+      "intro": "국내 대표 애견 단체. 혈통서 발급·견종 표준·국제 교류를 운영합니다. 문의 inchowon58@gmail.com · 010-2374-0401",
+      "banner": "/kkf/logo.png?v=2",
+      "badge": "공식 제휴"
+    },
+    {
+      "active": true,
+      "name": "사단법인 한국애견연맹",
+      "phone": "010-2374-0401",
+      "homepage": "https://www.thekkf.or.kr/new_home/main.php",
+      "kakao": "https://www.thekkf.or.kr/new_home/main.php",
+      "intro": "FCI 국제 도그쇼·전국 애견미용 콘테스트·자격검정 일정을 공식 안내합니다. 서울 도봉구 도봉로 169나길 6 KKF 빌딩",
+      "banner": "/kkf/logo.png?v=2",
+      "badge": "공식 제휴"
+    },
+    {
+      "active": true,
+      "name": "사단법인 한국애견연맹",
+      "phone": "010-2374-0401",
+      "homepage": "https://www.thekkf.or.kr/new_home/main.php",
+      "kakao": "https://www.thekkf.or.kr/new_home/main.php",
+      "intro": "반려문화증진위원회 디렉터리 공식 제휴. 혈통서·자격증·도그쇼·자료실 안내는 공식 사이트를 이용해 주세요.",
+      "banner": "/kkf/logo.png?v=2",
+      "badge": "공식 제휴"
+    }
+  ],
+  "notices": [
+    {
+      "id": "n1",
+      "title": "한국애견연맹 입장문",
+      "date": "2026-09",
+      "href": "https://www.thekkf.or.kr/new_home/main.php",
+      "pinned": true
+    },
+    {
+      "id": "n2",
+      "title": "제12회 FCI 국제 애견미용 콘테스트 결과 공고",
+      "date": "2026-09-11",
+      "href": "https://www.thekkf.or.kr/new_home/main.php",
+      "pinned": false
+    },
+    {
+      "id": "n3",
+      "title": "2026년 하반기 KKF 도그쇼 심사위원 자격 및 승급시험 안내",
+      "date": "2026-09",
+      "href": "https://www.thekkf.or.kr/new_home/main.php",
+      "pinned": false
+    },
+    {
+      "id": "n4",
+      "title": "2026 홍천 FCI 국제 도그쇼 출진 접수 마감",
+      "date": "2026-09",
+      "href": "https://www.thekkf.or.kr/new_home/main.php",
+      "pinned": false
+    },
+    {
+      "id": "n5",
+      "title": "2026 코리아 프리미어 도그쇼 (예정)",
+      "date": "접수예정",
+      "href": "https://www.thekkf.or.kr/new_home/main.php",
+      "pinned": false
+    }
+  ],
+  "kkf": {
+    "org": "사단법인 한국애견연맹",
+    "operator": "한국애견연맹 반려문화증진위원회",
+    "chairperson": "조춘원",
+    "federationAddress": "서울 도봉구 도봉로 169나길 6 [KKF 빌딩] (우: 01306)",
+    "federationEmail": "thekkf@thekkf.or.kr",
+    "committeeAddress": "부천시 원미구 상동",
+    "committeePhone": "010-2374-0401",
+    "committeeEmail": "inchowon58@gmail.com",
+    "phone": "010-2374-0401",
+    "email": "inchowon58@gmail.com",
+    "address": "부천시 원미구 상동",
+    "siteUrl": "https://www.thekkf.or.kr/new_home/main.php",
+    "blurb": "1948년부터 이어온 국내 대표 애견 단체와 반려문화증진위원회가 함께, 올바른 반려문화와 동네 펫 비즈니스 정보를 확산합니다.",
+    "links": [
+      { "label": "혈통서", "href": "https://www.thekkf.or.kr/new_home/main.php" },
+      { "label": "자격증", "href": "https://www.thekkf.or.kr/new_home/main.php" },
+      { "label": "도그쇼", "href": "https://www.thekkf.or.kr/new_home/main.php" },
+      { "label": "공지사항", "href": "https://www.thekkf.or.kr/new_home/main.php" },
+      { "label": "자료실", "href": "https://www.thekkf.or.kr/new_home/main.php" }
+    ],
+    "dogShows": [
+      { "title": "2026 코리아 프리미어 도그쇼", "status": "접수예정" },
+      { "title": "2026 안성 FCI 국제 도그쇼", "status": "접수예정" },
+      { "title": "2026 익산 FCI 국제 도그쇼", "status": "접수예정" },
+      { "title": "2026 홍천 FCI 국제 도그쇼", "status": "마감" }
+    ]
+  }
+}
