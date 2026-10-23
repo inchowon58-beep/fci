@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { DATASETS, getApiKey, importFromPortal, maskApiKey } from "@/lib/public-data";
-import { readRegistry, writeRegistry } from "@/lib/registry";
+import { getRemovedBusinessIds, readRegistry, writeRegistry } from "@/lib/registry";
 import { fingerprintBusiness } from "@/lib/pet-culture";
 import { isVercelRuntime } from "@/lib/cache-config";
 
@@ -40,6 +40,8 @@ export async function POST(req: Request) {
   }
 
   const result = await importFromPortal(datasetIds ? { datasetIds } : undefined);
+  const removed = await getRemovedBusinessIds();
+  const incomingBusinesses = result.businesses.filter((b) => !removed.has(b.id));
 
   if (result.partial) {
     const existing = await readRegistry();
@@ -52,7 +54,7 @@ export async function POST(req: Request) {
       keptBusinesses.map((b) => fingerprintBusiness(b.name, b.address)),
     );
     const mergedBusinesses = [...keptBusinesses];
-    for (const b of result.businesses) {
+    for (const b of incomingBusinesses) {
       const finger = fingerprintBusiness(b.name, b.address);
       if (seen.has(b.id) || seenFinger.has(finger)) continue;
       seen.add(b.id);
@@ -80,18 +82,18 @@ export async function POST(req: Request) {
       partial: true,
       steps: result.steps,
       probes: result.probes,
-      businesses: result.businesses,
+      businesses: incomingBusinesses,
       notices: result.notices,
       counts: {
         businesses: registry.businesses.length,
         notices: registry.notices.length,
-        added: result.businesses.length,
+        added: incomingBusinesses.length,
       },
     });
   }
 
   const registry = await writeRegistry({
-    businesses: result.businesses,
+    businesses: incomingBusinesses,
     notices: result.notices,
     steps: result.steps,
     probes: result.probes,

@@ -12,6 +12,7 @@ export interface RegistryFile {
 }
 
 const FILE = path.join(process.cwd(), "data", "registered.json");
+const REMOVED_FILE = path.join(process.cwd(), "data", "removed-business-ids.json");
 
 const EMPTY: RegistryFile = {
   updatedAt: "",
@@ -30,6 +31,26 @@ type CacheState = {
 
 let cache: CacheState | null = null;
 let loading: Promise<CacheState> | null = null;
+let removedIdsCache: Set<string> | null = null;
+
+/** 삭제 요청 등 — 재수집 시에도 제외 */
+export async function getRemovedBusinessIds(): Promise<Set<string>> {
+  if (removedIdsCache) return removedIdsCache;
+  try {
+    const raw = await fs.readFile(REMOVED_FILE, "utf8");
+    const parsed = JSON.parse(raw) as { entries?: { id: string }[] };
+    removedIdsCache = new Set((parsed.entries || []).map((e) => e.id).filter(Boolean));
+  } catch {
+    removedIdsCache = new Set();
+  }
+  return removedIdsCache;
+}
+
+function stripRemoved(registry: RegistryFile, removed: Set<string>): RegistryFile {
+  if (removed.size === 0) return registry;
+  const businesses = registry.businesses.filter((b) => !removed.has(b.id));
+  return businesses.length === registry.businesses.length ? registry : { ...registry, businesses };
+}
 
 async function loadCache(): Promise<CacheState> {
   try {
@@ -37,7 +58,8 @@ async function loadCache(): Promise<CacheState> {
     if (cache && cache.mtimeMs === stat.mtimeMs) return cache;
 
     const raw = await fs.readFile(FILE, "utf8");
-    const registry = { ...EMPTY, ...JSON.parse(raw) } as RegistryFile;
+    const removed = await getRemovedBusinessIds();
+    const registry = stripRemoved({ ...EMPTY, ...JSON.parse(raw) } as RegistryFile, removed);
     const byId = new Map<string, PetBusiness>();
     for (const b of registry.businesses) byId.set(b.id, b);
 
@@ -74,6 +96,7 @@ async function getCache(): Promise<CacheState> {
 /** 저장 후 메모리 캐시 비우기 */
 export function invalidateRegistryCache() {
   cache = null;
+  removedIdsCache = null;
 }
 
 export async function readRegistry(): Promise<RegistryFile> {
